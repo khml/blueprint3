@@ -1,3 +1,4 @@
+#[derive(PartialOrd, PartialEq, Debug)]
 pub enum TokenType {
     Equal,
     Plus,
@@ -5,50 +6,34 @@ pub enum TokenType {
     Asterisk,
     Slash,
     Percent,
+    Whitespace,
     Other,
 }
 
-impl std::fmt::Display for TokenType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match *self {
-            TokenType::Equal => write!(f, "Equal"),
-            TokenType::Plus => write!(f, "Plus"),
-            TokenType::Minus => write!(f, "Minus"),
-            TokenType::Asterisk => write!(f, "Asterisk"),
-            TokenType::Slash => write!(f, "Slash"),
-            TokenType::Percent => write!(f, "Percent"),
-            _ => write!(f, "Other"),
-        }
-    }
-}
-
+#[derive(Debug)]
 pub struct Token {
     t_type: TokenType,
     value: String,
 }
 
-impl std::fmt::Display for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", format!("({}, {})", self.t_type, self.value))
+fn get_token_type(ch: char) -> TokenType {
+    match ch {
+        '=' => TokenType::Equal,
+        '+' => TokenType::Plus,
+        '-' => TokenType::Minus,
+        '*' => TokenType::Asterisk,
+        '/' => TokenType::Slash,
+        '%' => TokenType::Percent,
+        ' ' => TokenType::Whitespace,
+        _ => TokenType::Other,
     }
 }
 
 pub fn tokenize(sentence: &str) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     for ch in sentence.chars() {
-        if ch == ' ' {
-            continue;
-        }
-        let token_type;
-        match ch {
-            '=' => token_type = TokenType::Equal,
-            '+' => token_type = TokenType::Plus,
-            '-' => token_type = TokenType::Minus,
-            '*' => token_type = TokenType::Asterisk,
-            '/' => token_type = TokenType::Slash,
-            '%' => token_type = TokenType::Percent,
-            _ => token_type = TokenType::Other,
-        }
+        let token_type = get_token_type(ch);
+        if token_type == TokenType::Whitespace { continue; }
         tokens.push(Token { t_type: token_type, value: ch.to_string() })
     }
     tokens
