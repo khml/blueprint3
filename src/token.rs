@@ -12,8 +12,8 @@ pub enum TokenType {
 
 #[derive(Debug)]
 pub struct Token {
-    t_type: TokenType,
-    value: String,
+    pub t_type: TokenType,
+    pub value: String,
 }
 
 fn get_token_type(ch: char) -> TokenType {
