@@ -1,9 +1,12 @@
 mod token;
+mod parser;
+
 use token::tokenize;
 
 fn main() {
-    let sentence = "a * b = c + d";
-    for token in tokenize(sentence) {
-        println!("{:?}", token)
-    }
+    let sentence = "1 + 2 + 3";
+    let mut tokens = tokenize(sentence);
+    let mut token_stack = parser::TokenStack::new(tokens);
+    let root_node = parser::sum(&mut token_stack);
+    println!("{:?}", root_node);
 }
