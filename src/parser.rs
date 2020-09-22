@@ -1,16 +1,15 @@
 use std::cell::Cell;
 
 use crate::token::{Token, TokenType};
-use crate::parser::OpType::{Identifier, Plus};
 
 #[derive(PartialOrd, PartialEq, Debug)]
 pub enum OpType {
     Asterisk,
     Identifier,
     Minus,
+    Number,
     Percent,
     Plus,
-    Root,
     Slash,
 }
 
@@ -41,11 +40,11 @@ pub fn sum(token_stack: &mut TokenStack) -> Node {
             token_stack.tokens.get_mut().push(op);
             break;
         }
-        sum = Node { op_type: Plus, token: op, args: vec![sum, number(token_stack)] };
+        sum = Node { op_type: OpType::Plus, token: op, args: vec![sum, number(token_stack)] };
     }
     sum
 }
 
 pub fn number(token_stack: &mut TokenStack) -> Node {
-    Node { op_type: Identifier, token: token_stack.tokens.get_mut().pop().unwrap(), args: vec![] }
+    Node { op_type: OpType::Number, token: token_stack.tokens.get_mut().pop().unwrap(), args: vec![] }
 }
