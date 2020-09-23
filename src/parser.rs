@@ -26,9 +26,9 @@ impl TokenStack {
 
 #[derive(Debug)]
 pub struct Node {
-    op_type: OpType,
-    token: Token,
-    args: Vec<Node>,
+    pub op_type: OpType,
+    pub token: Token,
+    pub args: Vec<Node>,
 }
 
 pub fn sum(token_stack: &mut TokenStack) -> Node {
