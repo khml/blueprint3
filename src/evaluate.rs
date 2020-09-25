@@ -8,5 +8,9 @@ pub fn evaluate(node: &Node) -> u32 {
     assert_eq!(node.args.len(), 2);
     let left = evaluate(node.args[0].borrow());
     let right = evaluate(node.args[1].borrow());
-    left + right
+    match node.op_type  {
+        OpType::Plus => left + right,
+        OpType::Minus => left - right,
+        _ => unimplemented!(),
+    }
 }
