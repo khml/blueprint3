@@ -36,11 +36,17 @@ pub fn sum(token_stack: &mut TokenStack) -> Node {
 
     while token_stack.tokens.get_mut().len() > 0 {
         let op: Token = token_stack.tokens.get_mut().pop().unwrap();
-        if op.t_type != TokenType::Plus {
-            token_stack.tokens.get_mut().push(op);
-            break;
+        let op_type;
+
+        match op.t_type {
+            TokenType::Plus => op_type = OpType::Plus,
+            TokenType::Minus => op_type = OpType::Minus,
+            _ => {
+                token_stack.tokens.get_mut().push(op);
+                break;
+            }
         }
-        sum = Node { op_type: OpType::Plus, token: op, args: vec![sum, number(token_stack)] };
+        sum = Node { op_type, token: op, args: vec![sum, number(token_stack)] };
     }
     sum
 }

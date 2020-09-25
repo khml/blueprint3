@@ -5,7 +5,7 @@ mod evaluate;
 use token::tokenize;
 
 fn main() {
-    let sentence = "1 + 2 + 3";
+    let sentence = "1 + 2 - 3";
 
     let mut tokens = tokenize(sentence);
     let mut token_stack = parser::TokenStack::new(tokens);
@@ -14,5 +14,5 @@ fn main() {
     println!("{:?}", root_node);
 
     let val = evaluate::evaluate(&root_node);
-    println!("{}", val)
+    println!("{}", val);
 }
