@@ -4,13 +4,9 @@ use crate::token::{Token, TokenType};
 
 #[derive(PartialOrd, PartialEq, Debug)]
 pub enum OpType {
-    Asterisk,
-    Identifier,
     Minus,
     Number,
-    Percent,
     Plus,
-    Slash,
 }
 
 pub struct TokenStack {
