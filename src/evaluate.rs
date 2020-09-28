@@ -9,8 +9,11 @@ pub fn evaluate(node: &Node) -> u32 {
     let left = evaluate(node.args[0].borrow());
     let right = evaluate(node.args[1].borrow());
     match node.op_type  {
-        OpType::Plus => left + right,
+        OpType::Asterisk => left * right,
         OpType::Minus => left - right,
+        OpType::Percent => left % right,
+        OpType::Plus => left + right,
+        OpType::Slash => left / right,
         _ => unimplemented!(),
     }
 }
