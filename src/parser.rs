@@ -28,7 +28,7 @@ pub struct Node {
 }
 
 pub fn sum(token_stack: &mut TokenStack) -> Node {
-    let mut sum = number(token_stack);
+    let mut sum_term = number(token_stack);
 
     while token_stack.tokens.get_mut().len() > 0 {
         let op: Token = token_stack.tokens.get_mut().pop().unwrap();
@@ -42,9 +42,9 @@ pub fn sum(token_stack: &mut TokenStack) -> Node {
                 break;
             }
         }
-        sum = Node { op_type, token: op, args: vec![sum, number(token_stack)] };
+        sum_term = Node { op_type, token: op, args: vec![sum_term, number(token_stack)] };
     }
-    sum
+    sum_term
 }
 
 pub fn number(token_stack: &mut TokenStack) -> Node {
