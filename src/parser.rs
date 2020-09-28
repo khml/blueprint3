@@ -4,9 +4,12 @@ use crate::token::{Token, TokenType};
 
 #[derive(PartialOrd, PartialEq, Debug)]
 pub enum OpType {
+    Asterisk,
     Minus,
     Number,
+    Percent,
     Plus,
+    Slash,
 }
 
 pub struct TokenStack {
@@ -28,7 +31,7 @@ pub struct Node {
 }
 
 pub fn sum(token_stack: &mut TokenStack) -> Node {
-    let mut sum = number(token_stack);
+    let mut sum_term = mul(token_stack);
 
     while token_stack.tokens.get_mut().len() > 0 {
         let op: Token = token_stack.tokens.get_mut().pop().unwrap();
@@ -42,9 +45,30 @@ pub fn sum(token_stack: &mut TokenStack) -> Node {
                 break;
             }
         }
-        sum = Node { op_type, token: op, args: vec![sum, number(token_stack)] };
+        sum_term = Node { op_type, token: op, args: vec![sum_term, mul(token_stack)] };
     }
-    sum
+    sum_term
+}
+
+pub fn mul(token_stack: &mut TokenStack) -> Node {
+    let mut mul_term = number(token_stack);
+
+    while token_stack.tokens.get_mut().len() > 0 {
+        let op: Token = token_stack.tokens.get_mut().pop().unwrap();
+        let op_type;
+
+        match op.t_type {
+            TokenType::Asterisk => op_type = OpType::Asterisk,
+            TokenType::Slash => op_type = OpType::Slash,
+            TokenType::Percent => op_type = OpType::Percent,
+            _ => {
+                token_stack.tokens.get_mut().push(op);
+                break;
+            }
+        }
+        mul_term = Node { op_type, token: op, args: vec![mul_term, number(token_stack)] };
+    }
+    mul_term
 }
 
 pub fn number(token_stack: &mut TokenStack) -> Node {
