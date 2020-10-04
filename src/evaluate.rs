@@ -1,7 +1,7 @@
 use crate::parser::{Node, OpType};
 use std::borrow::Borrow;
 
-pub fn evaluate(node: &Node) -> u32 {
+pub fn evaluate(node: &Node) -> f64 {
     if node.args.len() == 0 {
         return node.token.value.parse().unwrap();
     }

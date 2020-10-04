@@ -1,13 +1,13 @@
 #[derive(PartialOrd, PartialEq, Debug)]
 pub enum TokenType {
     Equal,
-    Plus,
+    Number,
     Minus,
     Asterisk,
     Slash,
     Percent,
+    Plus,
     Whitespace,
-    Other,
 }
 
 #[derive(Debug)]
@@ -16,25 +16,25 @@ pub struct Token {
     pub value: String,
 }
 
-fn get_token_type(ch: char) -> TokenType {
+fn get_token_type(ch: char) -> Result<TokenType, String> {
     match ch {
-        '=' => TokenType::Equal,
-        '+' => TokenType::Plus,
-        '-' => TokenType::Minus,
-        '*' => TokenType::Asterisk,
-        '/' => TokenType::Slash,
-        '%' => TokenType::Percent,
-        ' ' => TokenType::Whitespace,
-        _ => TokenType::Other,
+        '=' => Ok(TokenType::Equal),
+        '+' => Ok(TokenType::Plus),
+        '-' => Ok(TokenType::Minus),
+        '*' => Ok(TokenType::Asterisk),
+        '/' => Ok(TokenType::Slash),
+        '%' => Ok(TokenType::Percent),
+        ' ' => Ok(TokenType::Whitespace),
+        _ => Ok(TokenType::Number),
     }
 }
 
-pub fn tokenize(sentence: &str) -> Vec<Token> {
+pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
     for ch in sentence.chars() {
-        let token_type = get_token_type(ch);
+        let token_type = get_token_type(ch)?;
         if token_type == TokenType::Whitespace { continue; }
         tokens.push(Token { t_type: token_type, value: ch.to_string() })
     }
-    tokens
+    Ok(tokens)
 }
