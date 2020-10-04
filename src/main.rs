@@ -5,7 +5,7 @@ mod evaluate;
 use token::tokenize;
 
 fn main() {
-    let sentence = "1 * 2 + 3";
+    let sentence = "1 * 2 - 3 / 3";
 
     let tokens = tokenize(sentence);
     let mut token_stack = parser::TokenStack::new(tokens);
