@@ -1,11 +1,12 @@
 #[derive(PartialOrd, PartialEq, Debug)]
 pub enum TokenType {
     Equal,
-    Plus,
+    Number,
     Minus,
     Asterisk,
     Slash,
     Percent,
+    Plus,
     Whitespace,
 }
 
@@ -24,7 +25,7 @@ fn get_token_type(ch: char) -> Result<TokenType, String> {
         '/' => Ok(TokenType::Slash),
         '%' => Ok(TokenType::Percent),
         ' ' => Ok(TokenType::Whitespace),
-        _ => Err(format!("can NOT tokenize: {}", ch)),
+        _ => Ok(TokenType::Number),
     }
 }
 
