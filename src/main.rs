@@ -5,7 +5,7 @@ mod evaluate;
 use token::tokenize;
 
 fn main() {
-    let sentence = "(1+2)*3";
+    let sentence = "( 1 + 2 ) * 3";
 
     let tokens = tokenize(sentence).unwrap();
     println!("{:?}", tokens);
