@@ -1,2 +1,3 @@
 sum = mul { “+” mul | “-“ mul }
-mul = number { “*” number | “/“ number | “%” number }
+mul = priority { “*” priority | “/“ priority | “%” priority }
+priority = number | “(“ sum “)”
