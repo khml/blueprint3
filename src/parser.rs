@@ -50,8 +50,26 @@ pub fn sum(token_stack: &mut TokenStack) -> Node {
     sum_term
 }
 
+pub fn number(token_stack: &mut TokenStack) -> Node {
+    Node { op_type: OpType::Number, token: token_stack.tokens.get_mut().pop().unwrap(), args: vec![] }
+}
+
+pub fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
+    if token_stack.tokens.get_mut().last().unwrap().t_type != TokenType::ParenthesisLeft{
+        return Ok(number(token_stack));
+    }
+    token_stack.tokens.get_mut().pop().unwrap();
+    let node = sum(token_stack);
+
+    let t_type = token_stack.tokens.get_mut().pop().unwrap().t_type;
+    match t_type {
+        TokenType::ParenthesisRight => Ok(node),
+        _ => Err(format!("Expected: {:?} token, but {:?} given", TokenType::ParenthesisRight, t_type)),
+    }
+}
+
 pub fn mul(token_stack: &mut TokenStack) -> Node {
-    let mut mul_term = number(token_stack);
+    let mut priority_term = priority(token_stack).unwrap();
 
     while token_stack.tokens.get_mut().len() > 0 {
         let op: Token = token_stack.tokens.get_mut().pop().unwrap();
@@ -66,11 +84,7 @@ pub fn mul(token_stack: &mut TokenStack) -> Node {
                 break;
             }
         }
-        mul_term = Node { op_type, token: op, args: vec![mul_term, number(token_stack)] };
+        priority_term = Node { op_type, token: op, args: vec![priority_term, priority(token_stack).unwrap()] };
     }
-    mul_term
-}
-
-pub fn number(token_stack: &mut TokenStack) -> Node {
-    Node { op_type: OpType::Number, token: token_stack.tokens.get_mut().pop().unwrap(), args: vec![] }
+    priority_term
 }
