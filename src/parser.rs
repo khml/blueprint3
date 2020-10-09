@@ -99,11 +99,12 @@ mod tests {
     use super::TokenStack;
     use super::TokenType;
     use super::number;
+    use super::sum;
 
     #[test]
     fn test_number() {
         let mut token_stack = TokenStack {
-            tokens: Cell::new(vec![Token {t_type: TokenType::Number,value: "1".to_string()}])
+            tokens: Cell::new(vec![Token { t_type: TokenType::Number, value: "1".to_string() }])
         };
         let expected = Node {
             op_type: OpType::Number,
@@ -114,5 +115,72 @@ mod tests {
             args: vec![],
         };
         assert_eq!(number(&mut token_stack), expected);
+    }
+
+    #[test]
+    fn test_sum() {
+        let mut token_stack = TokenStack {
+            tokens: Cell::new(vec![
+                Token { t_type: TokenType::Number, value: "2".to_string() },
+                Token { t_type: TokenType::Plus, value: "+".to_string() },
+                Token { t_type: TokenType::Number, value: "1".to_string() },
+            ])
+        };
+        let one_plus_two = Node {
+            op_type: OpType::Plus,
+            token: Token {
+                t_type: TokenType::Plus,
+                value: "+".to_string(),
+            },
+            args: vec![
+                Node {
+                    op_type: OpType::Number,
+                    token: Token {
+                        t_type: TokenType::Number,
+                        value: "1".to_string(),
+                    },
+                    args: vec![],
+                },
+                Node {
+                    op_type: OpType::Number,
+                    token: Token {
+                        t_type: TokenType::Number,
+                        value: "2".to_string(),
+                    },
+                    args: vec![],
+                }
+            ],
+        };
+        assert_eq!(sum(&mut token_stack), one_plus_two);
+
+
+        let mut token_stack = TokenStack {
+            tokens: Cell::new(vec![
+                Token { t_type: TokenType::Number, value: "3".to_string() },
+                Token { t_type: TokenType::Plus, value: "+".to_string() },
+                Token { t_type: TokenType::Number, value: "2".to_string() },
+                Token { t_type: TokenType::Plus, value: "+".to_string() },
+                Token { t_type: TokenType::Number, value: "1".to_string() },
+            ])
+        };
+        let expected = Node {
+            op_type: OpType::Plus,
+            token: Token {
+                t_type: TokenType::Plus,
+                value: "+".to_string(),
+            },
+            args: vec![
+                one_plus_two,
+                Node {
+                    op_type: OpType::Number,
+                    token: Token {
+                        t_type: TokenType::Number,
+                        value: "3".to_string(),
+                    },
+                    args: vec![],
+                },
+            ],
+        };
+        assert_eq!(sum(&mut token_stack), expected);
     }
 }
