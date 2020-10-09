@@ -2,7 +2,7 @@ use std::cell::Cell;
 
 use crate::token::{Token, TokenType};
 
-#[derive(PartialOrd, PartialEq, Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum OpType {
     Asterisk,
     Minus,
@@ -23,7 +23,7 @@ impl TokenStack {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Node {
     pub op_type: OpType,
     pub token: Token,
@@ -55,7 +55,7 @@ pub fn number(token_stack: &mut TokenStack) -> Node {
 }
 
 pub fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
-    if token_stack.tokens.get_mut().last().unwrap().t_type != TokenType::ParenthesisLeft{
+    if token_stack.tokens.get_mut().last().unwrap().t_type != TokenType::ParenthesisLeft {
         return Ok(number(token_stack));
     }
     token_stack.tokens.get_mut().pop().unwrap();
@@ -87,4 +87,32 @@ pub fn mul(token_stack: &mut TokenStack) -> Node {
         priority_term = Node { op_type, token: op, args: vec![priority_term, priority(token_stack).unwrap()] };
     }
     priority_term
+}
+
+#[cfg(test)]
+mod tests {
+    use std::cell::Cell;
+
+    use super::Node;
+    use super::OpType;
+    use super::Token;
+    use super::TokenStack;
+    use super::TokenType;
+    use super::number;
+
+    #[test]
+    fn test_number() {
+        let mut token_stack = TokenStack {
+            tokens: Cell::new(vec![Token {t_type: TokenType::Number,value: "1".to_string()}])
+        };
+        let expected = Node {
+            op_type: OpType::Number,
+            token: Token {
+                t_type: TokenType::Number,
+                value: "1".to_string(),
+            },
+            args: vec![],
+        };
+        assert_eq!(number(&mut token_stack), expected);
+    }
 }
