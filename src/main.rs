@@ -1,3 +1,5 @@
+use std::io::Write;
+
 mod token;
 mod parser;
 mod evaluate;
@@ -5,15 +7,29 @@ mod evaluate;
 use token::tokenize;
 
 fn main() {
-    let sentence = "( 1 + 2 ) * 3";
+    loop {
+        let mut sentence = String::new();
+        print!("> ");
+        std::io::stdout().flush().ok();
 
-    let tokens = tokenize(sentence).unwrap();
-    println!("{:?}", tokens);
-    let mut token_stack = parser::TokenStack::new(tokens);
+        std::io::stdin().read_line(&mut sentence).ok();
 
-    let root_node = parser::sum(&mut token_stack);
-    println!("{:?}", root_node);
+        let tokens = tokenize(sentence.trim()).unwrap();
 
-    let val = evaluate::evaluate(&root_node);
-    println!("{}", val);
+        if tokens.len() == 0 {
+            continue;
+        }
+
+        println!("{:?}", tokens);
+
+        let mut token_stack = parser::TokenStack::new(tokens);
+
+        let root_node = parser::parse(&mut token_stack);
+        println!("{:?}", root_node);
+
+        let val = evaluate::evaluate(&root_node);
+        println!("{}", val);
+
+        println!();
+    }
 }

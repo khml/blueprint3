@@ -30,6 +30,10 @@ pub struct Node {
     pub args: Vec<Node>,
 }
 
+pub fn parse(token_stack: &mut TokenStack) -> Node {
+    sum(token_stack)
+}
+
 pub fn sum(token_stack: &mut TokenStack) -> Node {
     let mut sum_term = mul(token_stack);
 
