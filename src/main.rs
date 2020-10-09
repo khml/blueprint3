@@ -15,7 +15,13 @@ fn main() {
         std::io::stdin().read_line(&mut sentence).ok();
 
         let tokens = tokenize(sentence.trim()).unwrap();
+
+        if tokens.len() == 0 {
+            continue;
+        }
+
         println!("{:?}", tokens);
+
         let mut token_stack = parser::TokenStack::new(tokens);
 
         let root_node = parser::parse(&mut token_stack);
