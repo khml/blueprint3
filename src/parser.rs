@@ -100,6 +100,7 @@ mod tests {
     use super::TokenType;
     use super::number;
     use super::sum;
+    use super::mul;
 
     #[test]
     fn test_number() {
@@ -182,5 +183,72 @@ mod tests {
             ],
         };
         assert_eq!(sum(&mut token_stack), expected);
+    }
+
+    #[test]
+    fn test_mul() {
+        let mut token_stack = TokenStack {
+            tokens: Cell::new(vec![
+                Token { t_type: TokenType::Number, value: "3".to_string() },
+                Token { t_type: TokenType::Asterisk, value: "*".to_string() },
+                Token { t_type: TokenType::Number, value: "1".to_string() },
+            ])
+        };
+        let one_product_three = Node {
+            op_type: OpType::Asterisk,
+            token: Token {
+                t_type: TokenType::Asterisk,
+                value: "*".to_string(),
+            },
+            args: vec![
+                Node {
+                    op_type: OpType::Number,
+                    token: Token {
+                        t_type: TokenType::Number,
+                        value: "1".to_string(),
+                    },
+                    args: vec![],
+                },
+                Node {
+                    op_type: OpType::Number,
+                    token: Token {
+                        t_type: TokenType::Number,
+                        value: "3".to_string(),
+                    },
+                    args: vec![],
+                }
+            ],
+        };
+        assert_eq!(mul(&mut token_stack), one_product_three);
+
+
+        let mut token_stack = TokenStack {
+            tokens: Cell::new(vec![
+                Token { t_type: TokenType::Number, value: "5".to_string() },
+                Token { t_type: TokenType::Asterisk, value: "*".to_string() },
+                Token { t_type: TokenType::Number, value: "3".to_string() },
+                Token { t_type: TokenType::Asterisk, value: "*".to_string() },
+                Token { t_type: TokenType::Number, value: "1".to_string() },
+            ])
+        };
+        let expected = Node {
+            op_type: OpType::Asterisk,
+            token: Token {
+                t_type: TokenType::Asterisk,
+                value: "*".to_string(),
+            },
+            args: vec![
+                one_product_three,
+                Node {
+                    op_type: OpType::Number,
+                    token: Token {
+                        t_type: TokenType::Number,
+                        value: "5".to_string(),
+                    },
+                    args: vec![],
+                },
+            ],
+        };
+        assert_eq!(mul(&mut token_stack), expected);
     }
 }
