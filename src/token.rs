@@ -71,11 +71,13 @@ pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Borrow;
+
     use super::Token;
     use super::TokenType;
     use super::get_token_type;
     use super::tokenize;
-    use std::borrow::Borrow;
+    use super::read_number;
 
     #[test]
     fn test_get_token_type() {
@@ -118,5 +120,20 @@ mod tests {
             Token { t_type: TokenType::Number, value: "3".to_string() },
         ];
         assert_eq!(tokenize("(1 + 2) / 3").unwrap(), expected);
+    }
+
+    #[test]
+    fn test_read_number() {
+        {
+            let mut char_vec = vec!['5', '4', '+', '3', '2', '+', '1'];
+            let expected = "1".to_string();
+            assert_eq!(read_number(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '+', '3', '2', '1'];
+            let expected = "123".to_string();
+            assert_eq!(read_number(&mut char_vec), expected);
+        }
     }
 }
