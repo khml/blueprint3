@@ -18,7 +18,7 @@ pub struct Token {
     pub value: String,
 }
 
-fn get_token_type(ch: char) -> Result<TokenType, String> {
+fn get_token_type(ch: &char) -> Result<TokenType, String> {
     match ch {
         '=' => Ok(TokenType::Equal),
         '+' => Ok(TokenType::Plus),
@@ -35,11 +35,16 @@ fn get_token_type(ch: char) -> Result<TokenType, String> {
 
 pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
-    for ch in sentence.chars() {
-        let token_type = get_token_type(ch).unwrap();
+    let mut char_vec: Vec<char> = sentence.chars().collect();
+    char_vec.reverse();
+
+    while char_vec.len() > 0 {
+        let ch = char_vec.pop().unwrap();
+        let token_type = get_token_type(&ch).unwrap();
         if token_type == TokenType::Whitespace { continue; }
         tokens.push(Token { t_type: token_type, value: ch.to_string() })
     }
+
     Ok(tokens)
 }
 
@@ -49,18 +54,19 @@ mod tests {
     use super::TokenType;
     use super::get_token_type;
     use super::tokenize;
+    use std::borrow::Borrow;
 
     #[test]
     fn test_get_token_type() {
-        assert_eq!(get_token_type('=').unwrap(), TokenType::Equal);
-        assert_eq!(get_token_type('+').unwrap(), TokenType::Plus);
-        assert_eq!(get_token_type('-').unwrap(), TokenType::Minus);
-        assert_eq!(get_token_type('*').unwrap(), TokenType::Asterisk);
-        assert_eq!(get_token_type('/').unwrap(), TokenType::Slash);
-        assert_eq!(get_token_type('(').unwrap(), TokenType::ParenthesisLeft);
-        assert_eq!(get_token_type(')').unwrap(), TokenType::ParenthesisRight);
-        assert_eq!(get_token_type('%').unwrap(), TokenType::Percent);
-        assert_eq!(get_token_type(' ').unwrap(), TokenType::Whitespace);
+        assert_eq!(get_token_type('='.borrow()).unwrap(), TokenType::Equal);
+        assert_eq!(get_token_type('+'.borrow()).unwrap(), TokenType::Plus);
+        assert_eq!(get_token_type('-'.borrow()).unwrap(), TokenType::Minus);
+        assert_eq!(get_token_type('*'.borrow()).unwrap(), TokenType::Asterisk);
+        assert_eq!(get_token_type('/'.borrow()).unwrap(), TokenType::Slash);
+        assert_eq!(get_token_type('('.borrow()).unwrap(), TokenType::ParenthesisLeft);
+        assert_eq!(get_token_type(')'.borrow()).unwrap(), TokenType::ParenthesisRight);
+        assert_eq!(get_token_type('%'.borrow()).unwrap(), TokenType::Percent);
+        assert_eq!(get_token_type(' '.borrow()).unwrap(), TokenType::Whitespace);
     }
 
     #[test]
