@@ -33,6 +33,21 @@ fn get_token_type(ch: &char) -> Result<TokenType, String> {
     }
 }
 
+pub fn read_number(char_vec: &mut Vec<char>) -> String {
+    let mut char_stack: Vec<char> = vec![];
+
+    while char_vec.len() > 0 {
+        let ch: char = char_vec.pop().unwrap();
+        if get_token_type(&ch).unwrap() != TokenType::Number {
+            char_vec.push(ch);
+            break;
+        }
+        char_stack.push(ch);
+    }
+
+    char_stack.into_iter().collect()
+}
+
 pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut char_vec: Vec<char> = sentence.chars().collect();
@@ -42,7 +57,13 @@ pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
         let ch = char_vec.pop().unwrap();
         let token_type = get_token_type(&ch).unwrap();
         if token_type == TokenType::Whitespace { continue; }
-        tokens.push(Token { t_type: token_type, value: ch.to_string() })
+        match token_type {
+            TokenType::Number => {
+                char_vec.push(ch);
+                tokens.push(Token { t_type: token_type, value: read_number(&mut char_vec) });
+            }
+            _ => tokens.push(Token { t_type: token_type, value: ch.to_string() }),
+        }
     }
 
     Ok(tokens)
