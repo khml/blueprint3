@@ -43,15 +43,21 @@ pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     Ok(tokens)
 }
 
-#[test]
-pub fn test_get_token_type() {
-    assert_eq!(get_token_type('=').unwrap(), TokenType::Equal);
-    assert_eq!(get_token_type('+').unwrap(), TokenType::Plus);
-    assert_eq!(get_token_type('-').unwrap(), TokenType::Minus);
-    assert_eq!(get_token_type('*').unwrap(), TokenType::Asterisk);
-    assert_eq!(get_token_type('/').unwrap(), TokenType::Slash);
-    assert_eq!(get_token_type('(').unwrap(), TokenType::ParenthesisLeft);
-    assert_eq!(get_token_type(')').unwrap(), TokenType::ParenthesisRight);
-    assert_eq!(get_token_type('%').unwrap(), TokenType::Percent);
-    assert_eq!(get_token_type(' ').unwrap(), TokenType::Whitespace);
+#[cfg(test)]
+mod tests {
+    use super::TokenType;
+    use super::get_token_type;
+
+    #[test]
+    fn test_get_token_type() {
+        assert_eq!(get_token_type('=').unwrap(), TokenType::Equal);
+        assert_eq!(get_token_type('+').unwrap(), TokenType::Plus);
+        assert_eq!(get_token_type('-').unwrap(), TokenType::Minus);
+        assert_eq!(get_token_type('*').unwrap(), TokenType::Asterisk);
+        assert_eq!(get_token_type('/').unwrap(), TokenType::Slash);
+        assert_eq!(get_token_type('(').unwrap(), TokenType::ParenthesisLeft);
+        assert_eq!(get_token_type(')').unwrap(), TokenType::ParenthesisRight);
+        assert_eq!(get_token_type('%').unwrap(), TokenType::Percent);
+        assert_eq!(get_token_type(' ').unwrap(), TokenType::Whitespace);
+    }
 }
