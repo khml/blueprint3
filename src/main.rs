@@ -32,7 +32,7 @@ fn main() {
         let val = evaluate::evaluate(&root_node, &mut context);
         match val {
             Some(val) => { println!("{}", val); }
-            _ => { println!(); }
+            _ => {}
         }
 
         println!();
