@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 #[derive(PartialOrd, PartialEq, Eq, Debug)]
 pub enum TokenType {
     Asterisk,
@@ -74,6 +76,39 @@ pub fn read_number(char_vec: &mut Vec<char>) -> String {
     char_stack.into_iter().collect()
 }
 
+pub fn read_identifier(char_vec: &mut Vec<char>) -> String {
+    let mut char_stack: Vec<char> = vec![];
+
+    let rollback = |_char_vec: &mut Vec<char>, ch: char| {
+        _char_vec.push(ch);
+    };
+
+    match  get_token_type(char_vec.last().borrow().unwrap()).unwrap() {
+        TokenType::Alphabetic => {},
+        _ => {
+            return "".to_string();
+        },
+    }
+
+    while char_vec.len() > 0 {
+        let ch: char = char_vec.pop().unwrap();
+        match get_token_type(&ch).unwrap() {
+            TokenType::Alphabetic => {
+                char_stack.push(ch);
+            }
+            TokenType::Number => {
+                char_stack.push(ch);
+            }
+            _ => {
+                rollback(char_vec, ch);
+                break;
+            }
+        }
+    }
+
+    char_stack.into_iter().collect()
+}
+
 pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut char_vec: Vec<char> = sentence.chars().collect();
@@ -104,6 +139,7 @@ mod tests {
     use super::get_token_type;
     use super::tokenize;
     use super::read_number;
+    use super::read_identifier;
 
     #[test]
     fn test_get_token_type() {
@@ -177,6 +213,33 @@ mod tests {
             let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1'];
             let expected = "123.45".to_string();
             assert_eq!(read_number(&mut char_vec), expected);
+        }
+    }
+
+    #[test]
+    fn test_read_identifier() {
+        {
+            let mut char_vec = vec!['5', '4', '+', 'e', 'c', 'b', 'a'];
+            let expected = "abce".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['N', 'E', 'K', 'O', 'T'];
+            let expected = "TOKEN".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['3', '2', '1', 'R', 'T', 'S'];
+            let expected = "STR123".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1', '_'];
+            let expected = "_123".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
         }
     }
 }
