@@ -135,7 +135,15 @@ pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
             }
             TokenType::Alphabetic => {
                 char_vec.push(ch);
-                tokens.push(Token { t_type: token_type, value: read_identifier(&mut char_vec) });
+                let identifier = read_identifier(&mut char_vec);
+                match lookup_keyword(&identifier) {
+                    Some(v) => {
+                        tokens.push(Token { t_type: v, value: identifier });
+                    }
+                    _ => {
+                        tokens.push(Token { t_type: token_type, value: identifier });
+                    }
+                }
             }
             _ => tokens.push(Token { t_type: token_type, value: ch.to_string() }),
         }
@@ -229,6 +237,21 @@ mod tests {
                 Token { t_type: TokenType::Number, value: String::from("123") },
             ];
             assert_eq!(tokenize("abc123 / 123").unwrap(), expected);
+        }
+
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Let, value: String::from("let") },
+                Token { t_type: TokenType::Alphabetic, value: String::from("a") },
+                Token { t_type: TokenType::Equal, value: String::from("=") },
+                Token { t_type: TokenType::Number, value: String::from("1.23") },
+            ];
+            assert_eq!(tokenize("let a = 1.23").unwrap(), expected);
+        }
+
+        {
+            let expected = vec![Token { t_type: TokenType::Alphabetic, value: String::from("a") }, ];
+            assert_eq!(tokenize("a").unwrap(), expected);
         }
     }
 
