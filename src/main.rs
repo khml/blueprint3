@@ -30,7 +30,10 @@ fn main() {
         println!("{:?}", root_node);
 
         let val = evaluate::evaluate(&root_node, &mut context);
-        println!("{}", val);
+        match val {
+            Some(val) => { println!("{}", val); }
+            _ => { println!(); }
+        }
 
         println!();
     }
