@@ -1,14 +1,18 @@
+use std::borrow::Borrow;
+
 #[derive(PartialOrd, PartialEq, Eq, Debug)]
 pub enum TokenType {
+    Asterisk,
+    Alphabetic,
+    Dot,
     Equal,
     Number,
     Minus,
-    Asterisk,
-    Slash,
     ParenthesisLeft,
     ParenthesisRight,
     Percent,
     Plus,
+    Slash,
     Whitespace,
 }
 
@@ -20,29 +24,86 @@ pub struct Token {
 
 fn get_token_type(ch: &char) -> Result<TokenType, String> {
     match ch {
-        '=' => Ok(TokenType::Equal),
-        '+' => Ok(TokenType::Plus),
-        '-' => Ok(TokenType::Minus),
         '*' => Ok(TokenType::Asterisk),
-        '/' => Ok(TokenType::Slash),
+        '=' => Ok(TokenType::Equal),
+        '-' => Ok(TokenType::Minus),
         '(' => Ok(TokenType::ParenthesisLeft),
         ')' => Ok(TokenType::ParenthesisRight),
         '%' => Ok(TokenType::Percent),
+        '+' => Ok(TokenType::Plus),
+        '/' => Ok(TokenType::Slash),
+        '.' => Ok(TokenType::Dot),
         ' ' => Ok(TokenType::Whitespace),
-        _ => Ok(TokenType::Number),
+        _ => {
+            if ch.is_digit(10) {
+                Ok(TokenType::Number)
+            } else {
+                Ok(TokenType::Alphabetic)
+            }
+        }
     }
 }
 
 pub fn read_number(char_vec: &mut Vec<char>) -> String {
     let mut char_stack: Vec<char> = vec![];
+    let mut has_dot = false;
+
+    let rollback = |_char_vec: &mut Vec<char>, ch: char| {
+        _char_vec.push(ch);
+    };
 
     while char_vec.len() > 0 {
         let ch: char = char_vec.pop().unwrap();
-        if get_token_type(&ch).unwrap() != TokenType::Number {
-            char_vec.push(ch);
-            break;
+        match get_token_type(&ch).unwrap() {
+            TokenType::Number => {
+                char_stack.push(ch);
+            }
+            TokenType::Dot => {
+                if has_dot {
+                    rollback(char_vec, ch);
+                    break;
+                }
+                has_dot = true;
+                char_stack.push(ch);
+            }
+            _ => {
+                rollback(char_vec, ch);
+                break;
+            }
         }
-        char_stack.push(ch);
+    }
+
+    char_stack.into_iter().collect()
+}
+
+pub fn read_identifier(char_vec: &mut Vec<char>) -> String {
+    let mut char_stack: Vec<char> = vec![];
+
+    let rollback = |_char_vec: &mut Vec<char>, ch: char| {
+        _char_vec.push(ch);
+    };
+
+    match  get_token_type(char_vec.last().borrow().unwrap()).unwrap() {
+        TokenType::Alphabetic => {},
+        _ => {
+            return "".to_string();
+        },
+    }
+
+    while char_vec.len() > 0 {
+        let ch: char = char_vec.pop().unwrap();
+        match get_token_type(&ch).unwrap() {
+            TokenType::Alphabetic => {
+                char_stack.push(ch);
+            }
+            TokenType::Number => {
+                char_stack.push(ch);
+            }
+            _ => {
+                rollback(char_vec, ch);
+                break;
+            }
+        }
     }
 
     char_stack.into_iter().collect()
@@ -78,6 +139,7 @@ mod tests {
     use super::get_token_type;
     use super::tokenize;
     use super::read_number;
+    use super::read_identifier;
 
     #[test]
     fn test_get_token_type() {
@@ -90,6 +152,11 @@ mod tests {
         assert_eq!(get_token_type(')'.borrow()).unwrap(), TokenType::ParenthesisRight);
         assert_eq!(get_token_type('%'.borrow()).unwrap(), TokenType::Percent);
         assert_eq!(get_token_type(' '.borrow()).unwrap(), TokenType::Whitespace);
+        assert_eq!(get_token_type('1'.borrow()).unwrap(), TokenType::Number);
+        assert_eq!(get_token_type('a'.borrow()).unwrap(), TokenType::Alphabetic);
+        assert_eq!(get_token_type('Z'.borrow()).unwrap(), TokenType::Alphabetic);
+        assert_eq!(get_token_type('_'.borrow()).unwrap(), TokenType::Alphabetic);
+        assert_eq!(get_token_type('.'.borrow()).unwrap(), TokenType::Dot);
     }
 
     #[test]
@@ -134,6 +201,45 @@ mod tests {
             let mut char_vec = vec!['5', '4', '+', '3', '2', '1'];
             let expected = "123".to_string();
             assert_eq!(read_number(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '.', '3', '2', '1'];
+            let expected = "123.45".to_string();
+            assert_eq!(read_number(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1'];
+            let expected = "123.45".to_string();
+            assert_eq!(read_number(&mut char_vec), expected);
+        }
+    }
+
+    #[test]
+    fn test_read_identifier() {
+        {
+            let mut char_vec = vec!['5', '4', '+', 'e', 'c', 'b', 'a'];
+            let expected = "abce".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['N', 'E', 'K', 'O', 'T'];
+            let expected = "TOKEN".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['3', '2', '1', 'R', 'T', 'S'];
+            let expected = "STR123".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1', '_'];
+            let expected = "_123".to_string();
+            assert_eq!(read_identifier(&mut char_vec), expected);
         }
     }
 }
