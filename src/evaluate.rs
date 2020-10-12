@@ -43,5 +43,10 @@ mod tests {
             let expected: f64 = 2.0;
             assert_eq!(evaluate(&node), expected);
         }
+        {
+            let node = parse(&mut TokenStack::new(tokenize("0.8 + 3").unwrap()));
+            let expected: f64 = 3.8;
+            assert_eq!(evaluate(&node), expected);
+        }
     }
 }

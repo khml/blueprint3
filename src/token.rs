@@ -44,14 +44,31 @@ fn get_token_type(ch: &char) -> Result<TokenType, String> {
 
 pub fn read_number(char_vec: &mut Vec<char>) -> String {
     let mut char_stack: Vec<char> = vec![];
+    let mut has_dot = false;
+
+    let rollback = |_char_vec: &mut Vec<char>, ch: char| {
+        _char_vec.push(ch);
+    };
 
     while char_vec.len() > 0 {
         let ch: char = char_vec.pop().unwrap();
-        if get_token_type(&ch).unwrap() != TokenType::Number {
-            char_vec.push(ch);
-            break;
+        match get_token_type(&ch).unwrap() {
+            TokenType::Number => {
+                char_stack.push(ch);
+            }
+            TokenType::Dot => {
+                if has_dot {
+                    rollback(char_vec, ch);
+                    break;
+                }
+                has_dot = true;
+                char_stack.push(ch);
+            }
+            _ => {
+                rollback(char_vec, ch);
+                break;
+            }
         }
-        char_stack.push(ch);
     }
 
     char_stack.into_iter().collect()
@@ -147,6 +164,18 @@ mod tests {
         {
             let mut char_vec = vec!['5', '4', '+', '3', '2', '1'];
             let expected = "123".to_string();
+            assert_eq!(read_number(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '.', '3', '2', '1'];
+            let expected = "123.45".to_string();
+            assert_eq!(read_number(&mut char_vec), expected);
+        }
+
+        {
+            let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1'];
+            let expected = "123.45".to_string();
             assert_eq!(read_number(&mut char_vec), expected);
         }
     }
