@@ -1,14 +1,15 @@
 #[derive(PartialOrd, PartialEq, Eq, Debug)]
 pub enum TokenType {
+    Asterisk,
+    Alphabetic,
     Equal,
     Number,
     Minus,
-    Asterisk,
-    Slash,
     ParenthesisLeft,
     ParenthesisRight,
     Percent,
     Plus,
+    Slash,
     Whitespace,
 }
 
@@ -29,7 +30,13 @@ fn get_token_type(ch: &char) -> Result<TokenType, String> {
         ')' => Ok(TokenType::ParenthesisRight),
         '%' => Ok(TokenType::Percent),
         ' ' => Ok(TokenType::Whitespace),
-        _ => Ok(TokenType::Number),
+        _ => {
+            if ch.is_digit(10) {
+                Ok(TokenType::Number)
+            } else {
+                Ok(TokenType::Alphabetic)
+            }
+        }
     }
 }
 
@@ -90,6 +97,10 @@ mod tests {
         assert_eq!(get_token_type(')'.borrow()).unwrap(), TokenType::ParenthesisRight);
         assert_eq!(get_token_type('%'.borrow()).unwrap(), TokenType::Percent);
         assert_eq!(get_token_type(' '.borrow()).unwrap(), TokenType::Whitespace);
+        assert_eq!(get_token_type('1'.borrow()).unwrap(), TokenType::Number);
+        assert_eq!(get_token_type('a'.borrow()).unwrap(), TokenType::Alphabetic);
+        assert_eq!(get_token_type('Z'.borrow()).unwrap(), TokenType::Alphabetic);
+        assert_eq!(get_token_type('_'.borrow()).unwrap(), TokenType::Alphabetic);
     }
 
     #[test]
