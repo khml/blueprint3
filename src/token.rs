@@ -2,6 +2,7 @@
 pub enum TokenType {
     Asterisk,
     Alphabetic,
+    Dot,
     Equal,
     Number,
     Minus,
@@ -21,14 +22,15 @@ pub struct Token {
 
 fn get_token_type(ch: &char) -> Result<TokenType, String> {
     match ch {
-        '=' => Ok(TokenType::Equal),
-        '+' => Ok(TokenType::Plus),
-        '-' => Ok(TokenType::Minus),
         '*' => Ok(TokenType::Asterisk),
-        '/' => Ok(TokenType::Slash),
+        '=' => Ok(TokenType::Equal),
+        '-' => Ok(TokenType::Minus),
         '(' => Ok(TokenType::ParenthesisLeft),
         ')' => Ok(TokenType::ParenthesisRight),
         '%' => Ok(TokenType::Percent),
+        '+' => Ok(TokenType::Plus),
+        '/' => Ok(TokenType::Slash),
+        '.' => Ok(TokenType::Dot),
         ' ' => Ok(TokenType::Whitespace),
         _ => {
             if ch.is_digit(10) {
@@ -101,6 +103,7 @@ mod tests {
         assert_eq!(get_token_type('a'.borrow()).unwrap(), TokenType::Alphabetic);
         assert_eq!(get_token_type('Z'.borrow()).unwrap(), TokenType::Alphabetic);
         assert_eq!(get_token_type('_'.borrow()).unwrap(), TokenType::Alphabetic);
+        assert_eq!(get_token_type('.'.borrow()).unwrap(), TokenType::Dot);
     }
 
     #[test]
