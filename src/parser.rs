@@ -35,6 +35,7 @@ pub struct Node {
 pub fn parse(token_stack: &mut TokenStack) -> Node {
     match token_stack.tokens.get_mut().last().unwrap().t_type {
         TokenType::Let => { assignment(token_stack) }
+        TokenType::Alphabetic => { identifier(token_stack) }
         _ => { sum(token_stack) }
     }
 }
@@ -69,7 +70,7 @@ fn sum(token_stack: &mut TokenStack) -> Node {
 
 fn number(token_stack: &mut TokenStack) -> Node {
     let num = token_stack.tokens.get_mut().pop().unwrap();
-    assert_eq!(num.t_type, TokenType::Number);
+    assert_eq!(num.t_type, TokenType::Number, "num = {:?}, token_stack = {:?}", num, token_stack.tokens.get_mut());
     Node { op_type: OpType::Number, token: num, args: vec![] }
 }
 
@@ -237,6 +238,21 @@ mod tests {
                         args: vec![],
                     }
                 ],
+            };
+            assert_eq!(parse(&mut token_stack), expected);
+        }
+
+        {
+            let mut token_stack = TokenStack::new(
+                vec![Token { t_type: TokenType::Alphabetic, value: "foo".to_string() }]
+            );
+            let expected = Node {
+                op_type: OpType::Identifier,
+                token: Token {
+                    t_type: TokenType::Alphabetic,
+                    value: "foo".to_string(),
+                },
+                args: vec![],
             };
             assert_eq!(parse(&mut token_stack), expected);
         }
