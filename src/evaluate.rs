@@ -67,5 +67,12 @@ mod tests {
             let expected: f64 = 3.8;
             assert_eq!(evaluate(&node, &mut context), Some(expected));
         }
+        {
+            let mut context = Context::new();
+            let node = parse(&mut TokenStack::new(tokenize("let a = 1.23").unwrap()));
+            assert_eq!(evaluate(&node, &mut context), None);
+            let node = parse(&mut TokenStack::new(tokenize("a").unwrap()));
+            assert_eq!(evaluate(&node, &mut context), Some(1.23));
+        }
     }
 }
