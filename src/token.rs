@@ -44,7 +44,7 @@ fn get_token_type(ch: &char) -> Result<TokenType, String> {
     }
 }
 
-pub fn read_number(char_vec: &mut Vec<char>) -> String {
+fn read_number(char_vec: &mut Vec<char>) -> String {
     let mut char_stack: Vec<char> = vec![];
     let mut has_dot = false;
 
@@ -76,7 +76,7 @@ pub fn read_number(char_vec: &mut Vec<char>) -> String {
     char_stack.into_iter().collect()
 }
 
-pub fn read_identifier(char_vec: &mut Vec<char>) -> String {
+fn read_identifier(char_vec: &mut Vec<char>) -> String {
     let mut char_stack: Vec<char> = vec![];
 
     let rollback = |_char_vec: &mut Vec<char>, ch: char| {
