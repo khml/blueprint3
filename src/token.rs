@@ -6,6 +6,7 @@ pub enum TokenType {
     Alphabetic,
     Dot,
     Equal,
+    Let,
     Number,
     Minus,
     ParenthesisLeft,
@@ -109,6 +110,15 @@ fn read_identifier(char_vec: &mut Vec<char>) -> String {
     char_stack.into_iter().collect()
 }
 
+fn lookup_keyword(keyword: &String) -> Option<TokenType> {
+    match keyword.as_str() {
+        "let" => {
+            Some(TokenType::Let)
+        }
+        _ => { None }
+    }
+}
+
 pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut char_vec: Vec<char> = sentence.chars().collect();
@@ -144,6 +154,7 @@ mod tests {
     use super::tokenize;
     use super::read_number;
     use super::read_identifier;
+    use super::lookup_keyword;
 
     #[test]
     fn test_get_token_type() {
@@ -272,6 +283,17 @@ mod tests {
             let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1', '_'];
             let expected = "_123".to_string();
             assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+    }
+
+    #[test]
+    fn test_lookup_keyword() {
+        {
+            assert_eq!(lookup_keyword(String::from("le").borrow()), None)
+        }
+        {
+            let expected = TokenType::Let;
+            assert_eq!(lookup_keyword(String::from("let").borrow()), Some(expected))
         }
     }
 }
