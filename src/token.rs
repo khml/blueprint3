@@ -6,6 +6,7 @@ pub enum TokenType {
     Alphabetic,
     Dot,
     Equal,
+    Let,
     Number,
     Minus,
     ParenthesisLeft,
@@ -44,7 +45,7 @@ fn get_token_type(ch: &char) -> Result<TokenType, String> {
     }
 }
 
-pub fn read_number(char_vec: &mut Vec<char>) -> String {
+fn read_number(char_vec: &mut Vec<char>) -> String {
     let mut char_stack: Vec<char> = vec![];
     let mut has_dot = false;
 
@@ -76,18 +77,18 @@ pub fn read_number(char_vec: &mut Vec<char>) -> String {
     char_stack.into_iter().collect()
 }
 
-pub fn read_identifier(char_vec: &mut Vec<char>) -> String {
+fn read_identifier(char_vec: &mut Vec<char>) -> String {
     let mut char_stack: Vec<char> = vec![];
 
     let rollback = |_char_vec: &mut Vec<char>, ch: char| {
         _char_vec.push(ch);
     };
 
-    match  get_token_type(char_vec.last().borrow().unwrap()).unwrap() {
-        TokenType::Alphabetic => {},
+    match get_token_type(char_vec.last().borrow().unwrap()).unwrap() {
+        TokenType::Alphabetic => {}
         _ => {
             return "".to_string();
-        },
+        }
     }
 
     while char_vec.len() > 0 {
@@ -109,6 +110,15 @@ pub fn read_identifier(char_vec: &mut Vec<char>) -> String {
     char_stack.into_iter().collect()
 }
 
+fn lookup_keyword(keyword: &String) -> Option<TokenType> {
+    match keyword.as_str() {
+        "let" => {
+            Some(TokenType::Let)
+        }
+        _ => { None }
+    }
+}
+
 pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut char_vec: Vec<char> = sentence.chars().collect();
@@ -122,6 +132,10 @@ pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
             TokenType::Number => {
                 char_vec.push(ch);
                 tokens.push(Token { t_type: token_type, value: read_number(&mut char_vec) });
+            }
+            TokenType::Alphabetic => {
+                char_vec.push(ch);
+                tokens.push(Token { t_type: token_type, value: read_identifier(&mut char_vec) });
             }
             _ => tokens.push(Token { t_type: token_type, value: ch.to_string() }),
         }
@@ -140,6 +154,7 @@ mod tests {
     use super::tokenize;
     use super::read_number;
     use super::read_identifier;
+    use super::lookup_keyword;
 
     #[test]
     fn test_get_token_type() {
@@ -161,32 +176,60 @@ mod tests {
 
     #[test]
     fn test_tokenize() {
-        let expected = vec![];
-        assert_eq!(tokenize("").unwrap(), expected);
-        assert_eq!(tokenize(" ").unwrap(), expected);
-        assert_eq!(tokenize("   ").unwrap(), expected);
+        {
+            let expected = vec![];
+            assert_eq!(tokenize("").unwrap(), expected);
+            assert_eq!(tokenize(" ").unwrap(), expected);
+            assert_eq!(tokenize("   ").unwrap(), expected);
+        }
 
-        let expected = vec![Token { t_type: TokenType::Plus, value: "+".to_string() }];
-        assert_eq!(tokenize("+").unwrap(), expected);
+        {
+            let expected = vec![Token { t_type: TokenType::Plus, value: "+".to_string() }];
+            assert_eq!(tokenize("+").unwrap(), expected);
+        }
 
-        let expected = vec![
-            Token { t_type: TokenType::Number, value: "1".to_string() },
-            Token { t_type: TokenType::Plus, value: "+".to_string() },
-            Token { t_type: TokenType::Number, value: "2".to_string() },
-        ];
-        assert_eq!(tokenize("1 + 2").unwrap(), expected);
-        assert_eq!(tokenize("1+2").unwrap(), expected);
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Number, value: String::from("1") },
+                Token { t_type: TokenType::Plus, value: String::from("+") },
+                Token { t_type: TokenType::Number, value: String::from("2") },
+            ];
+            assert_eq!(tokenize("1 + 2").unwrap(), expected);
+            assert_eq!(tokenize("1+2").unwrap(), expected);
+        }
 
-        let expected = vec![
-            Token { t_type: TokenType::ParenthesisLeft, value: "(".to_string() },
-            Token { t_type: TokenType::Number, value: "1".to_string() },
-            Token { t_type: TokenType::Plus, value: "+".to_string() },
-            Token { t_type: TokenType::Number, value: "2".to_string() },
-            Token { t_type: TokenType::ParenthesisRight, value: ")".to_string() },
-            Token { t_type: TokenType::Slash, value: "/".to_string() },
-            Token { t_type: TokenType::Number, value: "3".to_string() },
-        ];
-        assert_eq!(tokenize("(1 + 2) / 3").unwrap(), expected);
+        {
+            let expected = vec![
+                Token { t_type: TokenType::ParenthesisLeft, value: String::from("(") },
+                Token { t_type: TokenType::Number, value: String::from("1") },
+                Token { t_type: TokenType::Plus, value: String::from("+") },
+                Token { t_type: TokenType::Number, value: String::from("2") },
+                Token { t_type: TokenType::ParenthesisRight, value: String::from(")") },
+                Token { t_type: TokenType::Slash, value: String::from("/") },
+                Token { t_type: TokenType::Number, value: String::from("3") },
+            ];
+            assert_eq!(tokenize("(1 + 2) / 3").unwrap(), expected);
+        }
+
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Alphabetic, value: String::from("a") },
+                Token { t_type: TokenType::Plus, value: String::from("+") },
+                Token { t_type: TokenType::Alphabetic, value: String::from("b") },
+                Token { t_type: TokenType::Asterisk, value: String::from("*") },
+                Token { t_type: TokenType::Alphabetic, value: String::from("c") },
+            ];
+            assert_eq!(tokenize("a + b * c").unwrap(), expected);
+        }
+
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Alphabetic, value: String::from("abc123") },
+                Token { t_type: TokenType::Slash, value: String::from("/") },
+                Token { t_type: TokenType::Number, value: String::from("123") },
+            ];
+            assert_eq!(tokenize("abc123 / 123").unwrap(), expected);
+        }
     }
 
     #[test]
@@ -240,6 +283,17 @@ mod tests {
             let mut char_vec = vec!['5', '4', '.', '5', '4', '.', '3', '2', '1', '_'];
             let expected = "_123".to_string();
             assert_eq!(read_identifier(&mut char_vec), expected);
+        }
+    }
+
+    #[test]
+    fn test_lookup_keyword() {
+        {
+            assert_eq!(lookup_keyword(String::from("le").borrow()), None)
+        }
+        {
+            let expected = TokenType::Let;
+            assert_eq!(lookup_keyword(String::from("let").borrow()), Some(expected))
         }
     }
 }
