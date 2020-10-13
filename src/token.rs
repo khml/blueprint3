@@ -83,11 +83,11 @@ pub fn read_identifier(char_vec: &mut Vec<char>) -> String {
         _char_vec.push(ch);
     };
 
-    match  get_token_type(char_vec.last().borrow().unwrap()).unwrap() {
-        TokenType::Alphabetic => {},
+    match get_token_type(char_vec.last().borrow().unwrap()).unwrap() {
+        TokenType::Alphabetic => {}
         _ => {
             return "".to_string();
-        },
+        }
     }
 
     while char_vec.len() > 0 {
@@ -122,6 +122,10 @@ pub fn tokenize(sentence: &str) -> Result<Vec<Token>, String> {
             TokenType::Number => {
                 char_vec.push(ch);
                 tokens.push(Token { t_type: token_type, value: read_number(&mut char_vec) });
+            }
+            TokenType::Alphabetic => {
+                char_vec.push(ch);
+                tokens.push(Token { t_type: token_type, value: read_identifier(&mut char_vec) });
             }
             _ => tokens.push(Token { t_type: token_type, value: ch.to_string() }),
         }
@@ -161,32 +165,60 @@ mod tests {
 
     #[test]
     fn test_tokenize() {
-        let expected = vec![];
-        assert_eq!(tokenize("").unwrap(), expected);
-        assert_eq!(tokenize(" ").unwrap(), expected);
-        assert_eq!(tokenize("   ").unwrap(), expected);
+        {
+            let expected = vec![];
+            assert_eq!(tokenize("").unwrap(), expected);
+            assert_eq!(tokenize(" ").unwrap(), expected);
+            assert_eq!(tokenize("   ").unwrap(), expected);
+        }
 
-        let expected = vec![Token { t_type: TokenType::Plus, value: "+".to_string() }];
-        assert_eq!(tokenize("+").unwrap(), expected);
+        {
+            let expected = vec![Token { t_type: TokenType::Plus, value: "+".to_string() }];
+            assert_eq!(tokenize("+").unwrap(), expected);
+        }
 
-        let expected = vec![
-            Token { t_type: TokenType::Number, value: "1".to_string() },
-            Token { t_type: TokenType::Plus, value: "+".to_string() },
-            Token { t_type: TokenType::Number, value: "2".to_string() },
-        ];
-        assert_eq!(tokenize("1 + 2").unwrap(), expected);
-        assert_eq!(tokenize("1+2").unwrap(), expected);
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Number, value: String::from("1") },
+                Token { t_type: TokenType::Plus, value: String::from("+") },
+                Token { t_type: TokenType::Number, value: String::from("2") },
+            ];
+            assert_eq!(tokenize("1 + 2").unwrap(), expected);
+            assert_eq!(tokenize("1+2").unwrap(), expected);
+        }
 
-        let expected = vec![
-            Token { t_type: TokenType::ParenthesisLeft, value: "(".to_string() },
-            Token { t_type: TokenType::Number, value: "1".to_string() },
-            Token { t_type: TokenType::Plus, value: "+".to_string() },
-            Token { t_type: TokenType::Number, value: "2".to_string() },
-            Token { t_type: TokenType::ParenthesisRight, value: ")".to_string() },
-            Token { t_type: TokenType::Slash, value: "/".to_string() },
-            Token { t_type: TokenType::Number, value: "3".to_string() },
-        ];
-        assert_eq!(tokenize("(1 + 2) / 3").unwrap(), expected);
+        {
+            let expected = vec![
+                Token { t_type: TokenType::ParenthesisLeft, value: String::from("(") },
+                Token { t_type: TokenType::Number, value: String::from("1") },
+                Token { t_type: TokenType::Plus, value: String::from("+") },
+                Token { t_type: TokenType::Number, value: String::from("2") },
+                Token { t_type: TokenType::ParenthesisRight, value: String::from(")") },
+                Token { t_type: TokenType::Slash, value: String::from("/") },
+                Token { t_type: TokenType::Number, value: String::from("3") },
+            ];
+            assert_eq!(tokenize("(1 + 2) / 3").unwrap(), expected);
+        }
+
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Alphabetic, value: String::from("a") },
+                Token { t_type: TokenType::Plus, value: String::from("+") },
+                Token { t_type: TokenType::Alphabetic, value: String::from("b") },
+                Token { t_type: TokenType::Asterisk, value: String::from("*") },
+                Token { t_type: TokenType::Alphabetic, value: String::from("c") },
+            ];
+            assert_eq!(tokenize("a + b * c").unwrap(), expected);
+        }
+
+        {
+            let expected = vec![
+                Token { t_type: TokenType::Alphabetic, value: String::from("abc123") },
+                Token { t_type: TokenType::Slash, value: String::from("/") },
+                Token { t_type: TokenType::Number, value: String::from("123") },
+            ];
+            assert_eq!(tokenize("abc123 / 123").unwrap(), expected);
+        }
     }
 
     #[test]
