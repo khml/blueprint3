@@ -5,6 +5,7 @@ use crate::token::{Token, TokenType};
 #[derive(Debug, Eq, PartialEq)]
 pub enum OpType {
     Asterisk,
+    Identifier,
     Minus,
     Number,
     Percent,
@@ -60,6 +61,12 @@ fn number(token_stack: &mut TokenStack) -> Node {
     Node { op_type: OpType::Number, token: num, args: vec![] }
 }
 
+fn identifier(token_stack: &mut TokenStack) -> Node {
+    let ident = token_stack.tokens.get_mut().pop().unwrap();
+    assert_eq!(ident.t_type, TokenType::Alphabetic);
+    Node { op_type: OpType::Identifier, token: ident, args: vec![] }
+}
+
 fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
     if token_stack.tokens.get_mut().last().unwrap().t_type != TokenType::ParenthesisLeft {
         return Ok(number(token_stack));
@@ -105,6 +112,7 @@ mod tests {
     use super::TokenStack;
     use super::TokenType;
     use super::number;
+    use super::identifier;
     use super::priority;
     use super::sum;
     use super::mul;
@@ -123,6 +131,20 @@ mod tests {
             args: vec![],
         };
         assert_eq!(number(&mut token_stack), expected);
+    }
+
+    #[test]
+    fn test_identifier() {
+        let mut token_stack = TokenStack::new(vec![Token { t_type: TokenType::Alphabetic, value: "abc".to_string() }]);
+        let expected = Node {
+            op_type: OpType::Identifier,
+            token: Token {
+                t_type: TokenType::Alphabetic,
+                value: "abc".to_string(),
+            },
+            args: vec![],
+        };
+        assert_eq!(identifier(&mut token_stack), expected);
     }
 
     #[test]
