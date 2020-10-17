@@ -55,7 +55,9 @@ fn sum(token_stack: &mut TokenStack) -> Node {
 }
 
 fn number(token_stack: &mut TokenStack) -> Node {
-    Node { op_type: OpType::Number, token: token_stack.tokens.get_mut().pop().unwrap(), args: vec![] }
+    let num = token_stack.tokens.get_mut().pop().unwrap();
+    assert_eq!(num.t_type, TokenType::Number);
+    Node { op_type: OpType::Number, token: num, args: vec![] }
 }
 
 fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
