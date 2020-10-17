@@ -34,7 +34,7 @@ pub fn parse(token_stack: &mut TokenStack) -> Node {
     sum(token_stack)
 }
 
-pub fn sum(token_stack: &mut TokenStack) -> Node {
+fn sum(token_stack: &mut TokenStack) -> Node {
     let mut sum_term = mul(token_stack);
 
     while token_stack.tokens.get_mut().len() > 0 {
@@ -54,11 +54,11 @@ pub fn sum(token_stack: &mut TokenStack) -> Node {
     sum_term
 }
 
-pub fn number(token_stack: &mut TokenStack) -> Node {
+fn number(token_stack: &mut TokenStack) -> Node {
     Node { op_type: OpType::Number, token: token_stack.tokens.get_mut().pop().unwrap(), args: vec![] }
 }
 
-pub fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
+fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
     if token_stack.tokens.get_mut().last().unwrap().t_type != TokenType::ParenthesisLeft {
         return Ok(number(token_stack));
     }
@@ -72,7 +72,7 @@ pub fn priority(token_stack: &mut TokenStack) -> Result<Node, String> {
     }
 }
 
-pub fn mul(token_stack: &mut TokenStack) -> Node {
+fn mul(token_stack: &mut TokenStack) -> Node {
     let mut priority_term = priority(token_stack).unwrap();
 
     while token_stack.tokens.get_mut().len() > 0 {
