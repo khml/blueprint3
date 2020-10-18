@@ -11,7 +11,13 @@ pub fn evaluate(node: &Node, context: &mut Context) -> Option<f64> {
             None
         }
         OpType::Identifier => {
-            Some(context.var_tbl.get_mut().get(&node.token.value).unwrap().clone())
+            match context.var_tbl.get_mut().get(&node.token.value) {
+                Some(val) => Some(val.clone()),
+                None => {
+                    eprintln!("'{}' is NOT defined", node.token.value);
+                    None
+                }
+            }
         }
         OpType::Number => {
             Some(node.token.value.parse().unwrap())
