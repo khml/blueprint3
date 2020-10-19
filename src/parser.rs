@@ -4,6 +4,7 @@ use crate::token::{Token, TokenType};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum OpType {
+    Assignment,
     Asterisk,
     Identifier,
     Minus,
@@ -33,6 +34,14 @@ pub struct Node {
 
 pub fn parse(token_stack: &mut TokenStack) -> Node {
     sum(token_stack)
+}
+
+fn assignment(token_stack: &mut TokenStack) -> Node {
+    assert_eq!(token_stack.tokens.get_mut().pop().unwrap().t_type, TokenType::Let);
+    let ident = identifier(token_stack);
+    assert_eq!(token_stack.tokens.get_mut().pop().unwrap().t_type, TokenType::Equal);
+    let s = sum(token_stack);
+    Node { op_type: OpType::Assignment, token: ident.token, args: vec![s] }
 }
 
 fn sum(token_stack: &mut TokenStack) -> Node {
@@ -111,11 +120,42 @@ mod tests {
     use super::Token;
     use super::TokenStack;
     use super::TokenType;
+    use super::assignment;
     use super::number;
     use super::identifier;
     use super::priority;
     use super::sum;
     use super::mul;
+
+    #[test]
+    fn test_assignment() {
+        {
+            let mut token_stack = TokenStack::new(vec![
+                Token { t_type: TokenType::Let, value: "let".to_string() },
+                Token { t_type: TokenType::Alphabetic, value: "abc".to_string() },
+                Token { t_type: TokenType::Equal, value: "=".to_string() },
+                Token { t_type: TokenType::Number, value: "123".to_string() },
+            ]);
+            let expected = Node {
+                op_type: OpType::Assignment,
+                token: Token {
+                    t_type: TokenType::Alphabetic,
+                    value: "abc".to_string(),
+                },
+                args: vec![
+                    Node {
+                        op_type: OpType::Number,
+                        token: Token {
+                            t_type: TokenType::Number,
+                            value: "123".to_string(),
+                        },
+                        args: vec![],
+                    }
+                ],
+            };
+            assert_eq!(assignment(&mut token_stack), expected);
+        }
+    }
 
     #[test]
     fn test_number() {
