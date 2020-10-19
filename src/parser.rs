@@ -33,7 +33,10 @@ pub struct Node {
 }
 
 pub fn parse(token_stack: &mut TokenStack) -> Node {
-    sum(token_stack)
+    match token_stack.tokens.get_mut().last().unwrap().t_type {
+        TokenType::Let => { assignment(token_stack) }
+        _ => { sum(token_stack) }
+    }
 }
 
 fn assignment(token_stack: &mut TokenStack) -> Node {
@@ -121,11 +124,12 @@ mod tests {
     use super::TokenStack;
     use super::TokenType;
     use super::assignment;
-    use super::number;
     use super::identifier;
+    use super::mul;
+    use super::number;
+    use super::parse;
     use super::priority;
     use super::sum;
-    use super::mul;
 
     #[test]
     fn test_assignment() {
@@ -171,6 +175,71 @@ mod tests {
             args: vec![],
         };
         assert_eq!(number(&mut token_stack), expected);
+    }
+
+    #[test]
+    fn test_parse() {
+        {
+            let mut token_stack = TokenStack::new(vec![
+                Token { t_type: TokenType::Let, value: "let".to_string() },
+                Token { t_type: TokenType::Alphabetic, value: "a".to_string() },
+                Token { t_type: TokenType::Equal, value: "=".to_string() },
+                Token { t_type: TokenType::Number, value: "123".to_string() },
+            ]);
+            let expected = Node {
+                op_type: OpType::Assignment,
+                token: Token {
+                    t_type: TokenType::Alphabetic,
+                    value: "a".to_string(),
+                },
+                args: vec![
+                    Node {
+                        op_type: OpType::Number,
+                        token: Token {
+                            t_type: TokenType::Number,
+                            value: "123".to_string(),
+                        },
+                        args: vec![],
+                    }
+                ],
+            };
+            assert_eq!(parse(&mut token_stack), expected);
+        }
+
+        {
+            let mut token_stack = TokenStack::new(vec![
+                Token { t_type: TokenType::Number, value: "10".to_string() },
+                Token { t_type: TokenType::Minus, value: "-".to_string() },
+                Token { t_type: TokenType::Number, value: "9".to_string() },
+            ]);
+
+            let expected = Node {
+                op_type: OpType::Minus,
+                token: Token {
+                    t_type: TokenType::Minus,
+                    value: "-".to_string(),
+                },
+                args: vec![
+                    Node {
+                        op_type: OpType::Number,
+                        token: Token {
+                            t_type: TokenType::Number,
+                            value: "10".to_string(),
+                        },
+                        args: vec![],
+                    },
+                    Node {
+                        op_type: OpType::Number,
+                        token: Token {
+                            t_type: TokenType::Number,
+                            value: "9".to_string(),
+                        },
+                        args: vec![],
+                    }
+                ],
+            };
+            assert_eq!(parse(&mut token_stack), expected);
+        }
     }
 
     #[test]
