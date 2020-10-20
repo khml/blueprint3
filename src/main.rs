@@ -3,10 +3,12 @@ use std::io::Write;
 mod token;
 mod parser;
 mod evaluate;
+mod context;
 
 use token::tokenize;
 
 fn main() {
+    let mut context = context::Context::new();
     loop {
         let mut sentence = String::new();
         print!("> ");
@@ -27,7 +29,7 @@ fn main() {
         let root_node = parser::parse(&mut token_stack);
         println!("{:?}", root_node);
 
-        let val = evaluate::evaluate(&root_node);
+        let val = evaluate::evaluate(&root_node, &mut context);
         println!("{}", val);
 
         println!();
